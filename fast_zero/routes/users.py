@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 
 from fast_zero.database import get_session
 from fast_zero.models import User
+from fast_zero.routes.auth import get_current_user
 from fast_zero.schemas import Message, UserList, UserPublic, UserSchema
-from fast_zero.security import get_current_user, get_password_hash
+from fast_zero.security import get_password_hash
 
+router = APIRouter(prefix='/users')
 Session = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
-
-router = APIRouter(prefix='/users', tags=['users'])
 
 
 @router.post('/', response_model=UserPublic, status_code=201)
@@ -60,11 +60,7 @@ def update_user(
 
 
 @router.delete('/{user_id}', response_model=Message)
-def delete_user(
-    user_id: int,
-    session: Session,
-    current_user: CurrentUser,
-):
+def delete_user(user_id: int, session: Session, current_user: CurrentUser):
     if current_user.id != user_id:
         raise HTTPException(status_code=400, detail='Not enough permissions')
 
